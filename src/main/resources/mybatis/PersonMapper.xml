@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zj.person.application.mapper.PersonMapper">
+	
+	<select id="infoList" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT 
+			infoId,
+			infoTitle,
+			isCheck, 
+			DATE_FORMAT(createTime,'%Y-%m-%d %H:%i') AS createTime
+		FROM 
+			z_j_info
+		WHERE 
+			userId = #{userId} 
+			<if test="isCheck!=null">
+           		and isCheck = 1
+       		</if>
+		order by createTime desc
+	</select>
+	
+	<select id="personDetail" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			u.nickName as nickName,
+			u.headIcon as headIcon
+			<if test="myUserId!=null">
+				,case when f.id is null then 0 else f.id end as id
+			</if>
+		FROM
+			z_j_users u 
+			<if test="myUserId!=null">
+				left join z_j_friend f on  f.userId = #{myUserId} and f.friendId = #{userId}
+			</if>
+		WHERE 
+			u.userId = #{userId} 
+	</select>
+	
+	<select id="friendsList" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT 
+			u.userId as userId,
+			u.nickName as nickName,
+			u.headIcon as headIcon
+		FROM 
+			z_j_friend f left join z_j_users u on f.friendId = u.userId
+		WHERE 
+			f.userId = #{userId}
+	</select>
+	
+	<select id="selectLike" resultType="com.zj.person.domain.LikeType">
+		SELECT 
+			id,
+			type
+		FROM 
+			z_j_liketype
+	</select>
+	
+	<delete id="friendDel" parameterType="java.util.Map">
+		delete from z_j_friend
+		where userId = #{userId} and friendId = #{friendId}
+	</delete>
+	
+	<insert id="friendAdd" parameterType="java.util.Map">
+		insert into z_j_friend(userId,friendId)values(#{userId},#{friendId})
+	</insert>
+	
+	<delete id="favouriteDel" parameterType="java.util.Map">
+		delete from z_j_favorite
+		where id = #{id} 
+	</delete>
+	
+	<select id="favouriteList" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT 
+			f.id as id,
+			i.infoId as infoId,
+			i.infoTitle as infoTitle,
+			i.isCheck as isCheck, 
+			DATE_FORMAT(i.createTime,'%Y-%m-%d %H:%i') AS createTime
+		FROM 
+			z_j_info i right join z_j_favorite f on i.infoId = f.infoId
+		WHERE 
+			f.userId = #{userId} 
+			<if test="selectInfo!=null">
+           		and i.infoTitle like CONCAT('%',#{selectInfo},'%' )
+       		</if>
+		order by createTime desc
+	</select>
+	
+	<delete id="infoDel" parameterType="java.util.Map">
+		delete from z_j_info
+		where infoId = #{infoId} 
+	</delete>
+	
+	<select id="totalGreat" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT
+			IFNULL(sum(great),0)
+		FROM 
+			z_j_info
+		WHERE 
+			isCheck = 1
+			and userId = #{userId}
+	</select>
+	
+	<update id="updatePerInfo" parameterType="java.util.Map">
+		update
+			z_j_users
+		set 
+			nickName = #{nickname},
+			age = #{age},
+			likeType = #{likeType}
+		where 
+			userId = #{userId}
+	</update>
+</mapper>

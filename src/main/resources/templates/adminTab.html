@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+<meta charset="utf-8">
+<title>标签管理</title>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="" />
+<meta name="author" content="zj" />
+
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/theme.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.min.css}" />
+<style type="text/css">
+   .lilist {
+    	list-style-type: none;
+	}
+</style>
+</head>
+<body>
+<div class="row-fluid">
+	<div class="widget widget-padding span12">
+		<div class="widget-header" style="position:relative;padding-left:77px">
+			<i class="icon-list-alt"></i>
+			<h5>审核发帖</h5>
+			<div style="position:absolute;right:15px;top:0;">
+				<h5 th:text="${adminName}"></h5>
+			</div>
+		</div>
+		<div class="widget-body">
+			<div class="widget-forms clearfix">
+
+				<form class="form-horizontal">
+					<div class="control-group">
+						<div class="controls">
+							<a id="modal" href="#modal-container" role="button" class="btn btn-info" data-toggle="modal">添加标签</a>
+							<input type="text" id="selectIfon" placeholder="标题" style="margin: 0px 0px 0px 3%;width: 40%;"/>
+							<button class="btn btn-primary" type="button" onclick="selectInfo()">查询</button>
+							<button class="btn" type="button" onclick="clearInfo()">清空</button>
+							<button class="btn btn-success" type="button" onclick="goShen()">审核发帖</button>
+							<button class="btn btn-warning" type="button" onclick="goTop6()">轮播管理</button>
+						</div>
+					</div>
+					
+					<div class="control-group">
+						<div class="controls">
+							<ul ></ul> 
+						</div>
+					</div>
+				</form>
+				<table class="table table-condensed table-hover">
+					<thead>
+						<tr>
+							<th>标签名称</th>
+							<th>帖子数量</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody id="tabList">
+					</tbody>
+				</table>
+
+				<div class="row clearfix">
+					<div class="col-md-12 column">
+						
+						<div class="modal fade" id="modal-container" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="closeTop()">×</button>
+										<h4 class="modal-title" id="myModalLabel">
+											标签设置
+										</h4>
+									</div>
+
+									<div class="modal-body">
+										<div class="form-group">
+											 <label for="exampleInputEmail1">标签名称</label>
+											 <input type="text" class="form-control" id="tabName" onkeyup="checkTab()" onfocus="clearDD()"/>
+											 <span id="warnMsg"></span>
+										</div>
+									</div>
+									<div class="modal-footer">
+										 <button type="button" class="btn btn-primary" data-dismiss="modal" aria-hidden="true" onclick="save()" id="zhale">保存</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+<input type="hidden" id="ctx" th:value="${#httpServletRequest.getContextPath()}" />
+</body>
+<script type="text/javascript" th:src="@{/js/jquery.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery-ui.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap2.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery.knob.js}"></script>
+<script type="text/javascript" th:src="@{/js/realm.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery.slimscroll.min.js}"></script>
+<script type="text/javascript">
+var ctx = $('#ctx').val();
+
+$(document).ready(function(){
+	selectInfo();
+});
+
+function clearDD(){
+	$("#warnMsg").text("");
+}
+var tabId = 0;
+function updateTab(id,e){
+	var temp = $(e).closest('tr').find('.baba').text();
+	tabId = id
+	$("#tabName").val(temp)
+}
+
+function checkTab(){
+	var tab = $.trim($("#tabName").val());
+	if(tab!=''){
+		$.ajax({
+	        type: 'POST',
+	        contentType: 'application/json; charset=utf-8',
+	        url: ctx+'/adminer/checkTab',
+	        data: JSON.stringify({
+	        	tabName:tab,
+	        	delFlag:0
+	        }),
+	        dataType: 'json',
+	        success: function (msg) {
+	        	console.info(msg)
+	        	if(msg.flag){
+	        		$("#warnMsg").text("已存在！")
+	        		$("#zhale").attr('disabled',true)
+	        	}else{
+	        		$("#warnMsg").text("")
+	        		$("#zhale").attr('disabled',false)
+	        	}
+	        },  
+	    });
+	}
+}
+
+function save(){
+	$.ajax({
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        url: ctx+'/adminer/addTabJ',  
+        data: JSON.stringify({
+        	tabName:$.trim($("#tabName").val()),
+        	delFlag:1,
+        	db:tabId
+        }),
+        dataType: 'json',
+        success: function (msg) {
+        	if(msg.flag){
+        		selectInfo()
+        		closeTop()
+        	}else{
+        		alert("请刷新后重试！");
+        	}      	
+        },  
+    });
+}
+
+function closeTop(){
+	$("#warnMsg").text("")
+ 	$("#tabName").val("")
+}
+
+function goShen(){
+	window.location.href=ctx+"/adminer/list";
+}
+
+function goTop6(){
+	window.location.href=ctx+"/adminer/top6";
+}
+
+function clearInfo(){
+	$("#selectIfon").val("");
+}
+
+function outTop6(param){
+	if(confirm('删除标签会影响已发帖')){
+		$.ajax({
+	        type: 'POST',
+	        contentType: 'application/json; charset=utf-8',
+	        url: ctx+'/adminer/outTab',  
+	        data: JSON.stringify({
+	        	id:param
+	        }),
+	        dataType: 'json',
+	        success: function (msg) {
+	        	if(msg.flag){
+	        		selectInfo()
+	        	}else{
+	        		alert("请刷新后重试！");
+	        	}      	
+	        },  
+	    });
+	}
+}
+
+function selectInfo(){
+	$.ajax({
+        type: 'POST',  
+        contentType: 'application/json; charset=utf-8',
+        url: ctx+'/adminer/selectTab',
+        data: JSON.stringify({
+        	selectTab:$.trim($("#selectIfon").val())
+        }),
+        dataType: 'json',
+        success: function (msg) { 
+        	
+        	var list = msg.tabList;
+        	console.info(msg)
+        	var temp = '';
+	            $.each(list,function(k,v){	                  	
+	            	temp +='<tr class="success">'
+	            		+'<td class="baba">'+v.typeName+'</td>'
+	            		+'<td>'+v.tabCount+'</td>'
+	            		+'<td><a id="modal" href="#modal-container" role="button" class="btn btn-success" data-toggle="modal" onclick="updateTab('+v.id+',this)">修改</a>     '
+	            		+'<button class="btn btn-danger" type="button" onclick="outTop6('+v.id+')">移除</button></td>'
+	            		+'</tr>'						
+	            });
+	            $('#tabList').html(temp);
+        },  
+    });
+}
+
+</script>
+</html>

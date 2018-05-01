@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+<meta charset="utf-8">
+<title>帖子详情</title>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="" />
+<meta name="author" content="zj" />
+
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/theme.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.min.css}" />
+
+</head>
+<body>
+<div class="row-fluid">
+	<div class="widget widget-padding span12">
+		<div class="widget-header" style="position:relative;padding-left:77px">
+			<i class="icon-list-alt"></i>
+			<h5>文章详情</h5>
+			<div style="position:absolute;right:15px;top:0;">
+				<img style="border-radius: 50%;width: 48px;height: 48px" th:src="@{'../../../../../images'+${headIcon}}"/>
+				<a href="javascript:goPerson(0)" th:text="${nickName}"></a>
+			</div>
+		</div>
+		<div class="widget-body">
+			<div class="widget-forms clearfix">
+				<form class="form-horizontal">
+					<div class="control-group">
+						<div class="controls">
+							 <h3 th:text="${detail.infoTitle}" style="text-align:center;width:80%"></h3>
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls">
+							 <img style="border-radius: 50%;width: 48px;height: 48px;margin:0px;vertical-align:middle;" th:src="@{'../../../../../images'+${detail.headIcon}}" th:onclick="'javascript:goPerson('+${detail.userId}+')'"/>
+							 <a th:onclick="'javascript:goPerson('+${detail.userId}+')'" href="#"><span th:text="${detail.nickName}" ></span></a>
+							 <span th:text="${detail.createTime}" style="margin-left: 60%;"></span>
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls" >
+						 被赞：<span th:text="${detail.great}"></span>
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls" th:each="img,imgStat : ${list}">
+							<img th:src="@{'../../../../../images'+${img}}" height="80%" width="80%" style="margin:0px 0px 10px 0px;height: 600px;width: 600px;margin-left: 15%"/>
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls">
+							<p th:text="${detail.infoDetail}"style="width: 75%;"></p> 
+						</div>
+					</div>
+					<div class="control-group">
+					    <div class="controls">
+						<div class="row-fluid">
+				          <div class="widget span9">
+				            <div class="widget-header">
+				              <i class="icon-comment-alt"></i>
+				            </div>  
+				            <div class="widget-body" style="height:310px;overflow:hidden">
+				              <div class="widget-comments clearfix slimscroll">			  
+				                <ul id="commentList">
+									
+				                  <li th:each="item,itemStat : ${listComment}">
+					                    <img th:src="@{'../../../../../images'+${item.headIcon}}" class="avatar" th:onclick="'javascript:goPerson('+${item.userId}+')'" />
+					                    <div class="comment-bubble">
+						                    <h4><strong><span th:text="${item.nickName}"></span></strong></h4>
+						                    <p th:utext="${item.comment}"></p>
+						                    <div class="date"><span th:text="${item.creatTime}"></span></div>
+					                    </div>
+				                  </li>
+				                 
+				                </ul>	
+				              </div>
+				            </div>          
+				          </div>
+				        </div>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">发表评论</label>
+						<div class="controls">
+							<textarea class="span7" rows="10" style="height: 100px;" id="infoDetail"></textarea>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="widget span8">
+              <div class="main_container" id="dashboard_page"></div>
+        	</div>
+		</div>
+		<div class="widget-footer">
+			<button class="btn" id="clickGreat" onclick="buildC()">发表评论</button>
+			<span th:utext="${boolGreat}" id="great"></span>
+			<span th:utext="${boolFavourite}" id="favourite"></span>		
+			<button class="btn" type="button" onclick="goBack()">返回</button>
+		</div>
+	</div>
+</div>
+<input type="hidden" id="ctx" th:value="${#httpServletRequest.getContextPath()}" />
+<input type="hidden" id="infoId" th:value="${detail.infoId}" />
+<input type="hidden" id="userId" th:value="${userId}" />
+</body>
+<script type="text/javascript" th:src="@{/js/jquery.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery-ui.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap2.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery.knob.js}"></script>
+<script type="text/javascript" th:src="@{/js/realm.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery.slimscroll.min.js}"></script>
+<script type="text/javascript">
+var ctx = $('#ctx').val();
+var infoId = $('#infoId').val();
+
+function goBack(){
+	window.location.href=ctx+"/xhs/list";
+}
+
+function goPerson(id){
+	var url = ctx+'/person/Info/';
+	url = id==0?url+$('#userId').val():url+id;
+	window.open(url);
+}
+
+function commentList(){
+	$.ajax({
+        type: 'POST',  
+        contentType: 'application/json; charset=utf-8',
+        url: ctx+'/xhs/infoComment',  
+        data: JSON.stringify({
+        	infoId:infoId
+        }),
+        dataType: 'json',
+        success: function (msg) { 
+        	var list = msg.list;
+        	var temp = '';
+	            $.each(list,function(k,v){
+	            	temp +='<li>'
+			             +'<img src="'+v.headIcon+'" class="avatar"/>'
+			             +'<div class="comment-bubble">'
+			             +'<h4><strong>'+v.nickName+'</strong></h4>'  			
+			             +v.comment		
+			             +'<div class="date">'+v.creatTime+'</div>'
+		            	 +'</div>' 
+		            	 +'</li>';
+	            });
+	            $('#commentList').append(temp);
+        },  
+    });
+}
+
+function buildC(){
+	var commentDetail = $.trim($('#infoDetail').val());
+	if(""==commentDetail){
+		alert("请输入您要发表的评论！");
+		return false;
+	}
+	$.ajax({
+        type: 'POST',  
+        contentType: 'application/json; charset=utf-8',
+        url: ctx+'/xhs/buileComment',  
+        data: JSON.stringify({
+        	infoId:infoId,
+        	comment:commentDetail
+        }),
+        dataType: 'json',
+        success: function (msg) {
+        	if(msg.flag){
+        		alert("发表成功！");
+            	$('#commentList').find("li").remove();
+            	commentList();
+            	$('#infoDetail').val("");
+        	}else{
+        		alert("请刷新后重试！");
+        	}      	
+        },  
+    });
+}
+
+function user(e){
+	var temp = "";
+	if("great"==e){
+		temp = "<button class=\"btn\" disabled=\"disabled\">已点赞</button>";
+	}
+	if("favourite"==e){
+		temp = "<button class=\"btn\" disabled=\"disabled\">已收藏</button>";
+	}
+	$.ajax({
+        type: 'POST',  
+        contentType: 'application/json; charset=utf-8',
+        url: ctx+'/xhs/greatAndFavourite',  
+        data: JSON.stringify({
+        	infoId:infoId,
+        	type:e
+        }),
+        dataType: 'json',
+        success: function (msg) {
+        	if(msg.flag){
+        		alert("成功！");
+            	$('#'+e).html(temp);
+        	}else{
+        		alert("请刷新后重试！");
+        	}
+        },  
+    });
+}
+</script>
+</html>

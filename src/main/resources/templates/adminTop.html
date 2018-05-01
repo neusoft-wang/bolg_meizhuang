@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+<meta charset="utf-8">
+<title>轮播管理</title>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="" />
+<meta name="author" content="zj" />
+
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/theme.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.min.css}" />
+<style type="text/css">
+   .lilist {
+    	list-style-type: none;
+	}
+</style>
+</head>
+<body>
+<div class="row-fluid">
+	<div class="widget widget-padding span12">
+		<div class="widget-header" style="position:relative;padding-left:77px">
+			<i class="icon-list-alt"></i>
+			<h5>审核发帖</h5>
+			<div style="position:absolute;right:15px;top:0;">
+				<h5 th:text="${adminName}"></h5>
+			</div>
+		</div>
+		<div class="widget-body">
+			<div class="widget-forms clearfix">
+
+				<form class="form-horizontal">
+					<div class="control-group">
+						<div class="controls">
+							<input type="text" id="selectIfon" placeholder="标题" style="margin: 0px 0px 0px 3%;width: 40%;"/>
+							<button class="btn btn-primary" type="button" onclick="selectInfo()">查询</button>
+							<button class="btn" type="button" onclick="clearInfo()">清空</button>
+							<button class="btn btn-success" type="button" onclick="goShen()">审核发帖</button>
+							<button class="btn btn-warning" type="button" onclick="goTab()">标签管理</button>
+						</div>
+					</div>
+					
+					<div class="control-group">
+						<div class="controls">
+							<ul ></ul> 
+						</div>
+					</div>
+				</form>
+				<table class="table table-condensed table-hover">
+					<thead>
+						<tr>
+							<th>位序</th>
+							<th>发帖</th>
+							<th>发表时间</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody id="top6List">
+					</tbody>
+				</table>
+				<table class="table table-condensed table-hover">
+					<thead>
+						<tr>								
+							<th>标题</th>
+							<th>发表时间</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody id="infoList">
+					</tbody>
+				</table>
+				
+				<div class="row clearfix">
+					<div class="col-md-12 column">
+						
+						<div class="modal fade" id="modal-container" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										 <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="closeTop()">×</button>
+										<h4 class="modal-title" id="myModalLabel">
+											轮播设置
+										</h4>
+									</div>
+
+									<div class="modal-body">
+										请选择轮播的位序（如果轮播列表不满6个发帖，取点赞数最高的帖子顺延补全）
+									</div>
+									<div class="modal-body">
+										<select id="type1" tabindex="1" data-placeholder="请选择。。" class="dropdown-toggle" style="margin-top:10px">
+											<option value="1" selected="selected">1</option>
+											<option value="2">2</option>
+											<option value="3">3</option>
+											<option value="4">4</option>
+											<option value="5">5</option>
+											<option value="6">6</option>
+										</select>
+									</div>
+									
+									<div class="modal-footer">
+										 <button type="button" class="btn btn-primary" data-dismiss="modal" aria-hidden="true" onclick="save()">保存</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+<input type="hidden" id="ctx" th:value="${#httpServletRequest.getContextPath()}" />
+</body>
+<script type="text/javascript" th:src="@{/js/jquery.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery-ui.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap2.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery.knob.js}"></script>
+<script type="text/javascript" th:src="@{/js/realm.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery.slimscroll.min.js}"></script>
+<script type="text/javascript">
+var ctx = $('#ctx').val();
+var infoid = 0;
+var currId = 0;
+$(document).ready(function(){
+	selectInfo();
+});
+
+function add(id,e){
+	infoid = id;
+	currId = e==0?0:$(e).parent().parent().find('.top6').text();
+}
+
+function save(){
+	$.ajax({
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        url: ctx+'/adminer/addTop6',  
+        data: JSON.stringify({
+        	infoid:infoid,
+        	selectId:$("#type1").val(),
+        	currId:currId
+        }),
+        dataType: 'json',
+        success: function (msg) {
+        	if(msg.flag){
+        		selectInfo();
+        		closeTop();
+        	}else{
+        		alert("请刷新后重试！");
+        	}      	
+        },  
+    });
+}
+
+function closeTop(){
+	$("#type1").val("1");
+}
+
+function goInfo(id){
+	window.location.href=ctx+"/adminer/Info/"+id+"/0";
+}
+
+function goShen(){
+	window.location.href=ctx+"/adminer/list";
+}
+
+function goTab(){
+	window.location.href=ctx+"/adminer/tabPage";
+}
+
+function clearInfo(){
+	$("#selectIfon").val("");
+}
+
+function outTop6(param){
+	if(confirm('移除轮播列表？')){
+		$.ajax({
+	        type: 'POST',
+	        contentType: 'application/json; charset=utf-8',
+	        url: ctx+'/adminer/outTop6',  
+	        data: JSON.stringify({
+	        	infoId:param
+	        }),
+	        dataType: 'json',
+	        success: function (msg) {
+	        	if(msg.flag){
+	        		selectInfo()
+	        	}else{
+	        		alert("请刷新后重试！");
+	        	}      	
+	        },  
+	    });
+	}
+}
+
+function selectInfo(){
+	$.ajax({
+        type: 'POST',  
+        contentType: 'application/json; charset=utf-8',
+        url: ctx+'/adminer/selectList',
+        data: JSON.stringify({
+        	selectInfo:$.trim($("#selectIfon").val()),
+        	topInfo:"top"
+        }),
+        dataType: 'json',
+        success: function (msg) { 
+        	var list = msg.list;
+        	var temp = '';
+	            $.each(list,function(k,v){	                  	
+	            	temp +='<tr class="warning">'
+	            		+'<td><strong>'+v.infoTitle+'</strong></td>'
+	            		+'<td>'+v.createTime+'</td>'
+	            		+'<td><button class="btn btn-primary" type="button" onclick="goInfo('+v.infoId+')">查看</button>     '
+	            		+'<a id="modal" href="#modal-container" role="button" class="btn btn-success" data-toggle="modal" onclick="add('+v.infoId+',0)">加入轮播</a>'
+	            		+'</tr>'						
+	            });
+	            $('#infoList').html(temp);
+	        	list = msg.toplist;
+				temp = '';
+	            $.each(list,function(k,v){	                  	
+	            	temp +='<tr class="success">'
+	            		+'<td class="top6"><strong>'+v.top6+'</strong></td>'
+	            		+'<td><strong>'+v.infoTitle+'</strong></td>'
+	            		+'<td>'+v.createTime+'</td>'
+	            		+'<td><button class="btn btn-primary" type="button" onclick="goInfo('+v.infoId+')">查看</button>     '
+	            		+'<a id="modal" href="#modal-container" role="button" class="btn btn-success" data-toggle="modal" onclick="add('+v.infoId+',this)">改变位序</a>     '
+	            		+'<button class="btn btn-danger" type="button" onclick="outTop6('+v.infoId+')">移除</button></td>'
+	            		+'</tr>'						
+	            });
+	            $('#top6List').html(temp);
+        },  
+    });
+}
+
+</script>
+</html>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zj.login.application.mapper.LoginMapper">
+
+	<resultMap id="BaseResultMap" type="com.zj.login.domain.Login">
+		<id column="userId" property="userId" jdbcType="INTEGER" />
+		<result column="isType" property="isType" jdbcType="INTEGER" />
+		<result column="age" property="age" jdbcType="INTEGER" />
+		<result column="email" property="email" jdbcType="VARCHAR" />
+		<result column="nickName" property="nickName" jdbcType="VARCHAR" />
+		<result column="headIcon" property="headIcon" jdbcType="VARCHAR" />
+		<result column="likeType" property="likeType" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<select id="getUser" parameterType="java.util.Map" resultMap="BaseResultMap">
+		SELECT
+			userId,
+			isType,
+			age,
+			email,
+			nickName,
+			headIcon,
+			likeType
+		FROM 
+			z_j_users
+		WHERE 
+			loginName = #{username} 
+			and loginKey = #{password}
+	</select>
+	
+	<select id="selectRegist" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT
+			count(userId)
+		FROM 
+			z_j_users
+		WHERE 
+			loginName = #{username} 
+	</select>
+	
+	<insert id="registNewOne" parameterType="java.util.Map">
+		INSERT INTO 
+			z_j_users
+			(loginName,loginKey,email,nickName,age,headIcon)
+		VALUES
+			(#{username},#{password},#{mail},#{nickname},#{age},"/logo.jpg")
+	</insert>
+	
+	<update id="updateHeadIcon" parameterType="com.zj.login.domain.Login">
+		update
+			z_j_users
+		set 
+			headIcon = #{headIcon}
+		where 
+			userId = #{userId}
+	</update>
+	
+	<insert id="insertImage" parameterType="java.util.Map">
+		INSERT INTO 
+			z_j_users
+			(loginName,loginKey,email,nickName,age,headIcon)
+		VALUES
+			(#{username},#{password},#{mail},#{nickname},#{age},#{headIcon})
+	</insert>
+</mapper>

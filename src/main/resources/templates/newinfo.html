@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+<meta charset="utf-8">
+<title>发表新的帖子</title>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="" />
+<meta name="author" content="zj" />
+
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/theme.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.min.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/css/fileUpload.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/css/iconfont.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap-select.min.css}" />
+<script type="text/javascript" th:src="@{/js/jquery.js}"></script>
+<script type="text/javascript" th:src="@{/js/fileUpload.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap-select.js}"></script>
+<script type="text/javascript" th:src="@{/js/defaults-zh_CN.js}"></script>
+
+</head>
+<body>
+	<div class="row-fluid">
+		<div class="widget widget-padding span12" >
+			<div class="widget-header" style="position:relative;padding-left:77px;">
+				<i class="icon-list-alt"></i>
+				<h5>发表文章</h5>
+			</div>
+			<div class="widget-body">
+				<div class="widget-forms clearfix">
+					<form class="form-horizontal">
+						<div class="control-group">
+							<label class="control-label">文章标题</label>
+							<div class="controls">
+								<input class="span7" type="text" id="infoTitle"> <span
+									id=""></span>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">文章标签</label>
+							<div class="controls">
+								<select class="selectpicker" multiple data-live-search="true" data-max-options="1" id="likeType" th:utext="${selectLike}">
+								</select>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">帖子详情</label>
+							<div class="controls">
+								<textarea class="span7" rows="10" style="height: 100px;"
+									id="infoDetail"></textarea>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">上传图片</label>
+							
+							<div class="controls">
+								<div id="fileUploadContent" class="fileUploadContent">
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div class="widget-footer">
+				<button class="btn btn-primary" type="button" id="fileUploadContent" onclick="save()">保存</button>
+				<button class="btn" type="button" onclick="javascript:history.back(-1);">返回</button>
+			</div>
+		</div>
+	</div>
+	<input type="hidden" id="ctx" th:value="${#httpServletRequest.getContextPath()}" />
+
+</body>
+<script type="text/javascript">
+var ctx = $('#ctx').val();
+var infoId = 0;
+// 上传图片
+$("#fileUploadContent").initUpload({
+    "uploadUrl":ctx+ '/xhs/subInfoImages',//上传文件信息地址
+    //"size":350,//文件大小限制，单位kb,默认不限制
+    "maxFileNumber":5,//文件个数限制，为整数
+    //"filelSavePath":"",//文件上传地址，后台设置的根目录
+    //"beforeUpload":beforeUploadFun,//在上传前执行的函数
+    "onUpload":onUploadFun,//在上传后执行的函数
+    //autoCommit:true,//文件是否自动上传
+    "fileType":['png','jpg','bmp','gif']//文件类型限制，默认不限制，注意写的是文件后缀
+});
+function saveImages(){
+	var opt = uploadTools.getOpt("fileUploadContent");
+	uploadEvent.uploadFileEvent(opt);
+}
+function onUploadFun(opt,data){
+    uploadTools.uploadError(opt);//显示上传错误
+    uploadTools.uploadSuccess(opt);//显示上传成功
+}
+function save(){
+	if("" == $.trim($("#infoTitle").val())){
+		alert("请输入标题!")
+		return false;
+	}
+	if("" == $.trim($("#infoDetail").val())){
+		alert("请输入文章详情!")
+		return false;
+	}
+	if(null == $("#likeType").val()){
+		alert("请输选择标签!")
+		return false;
+	}
+	$.ajax({
+		  type: 'POST',
+		  contentType: 'application/json; charset=utf-8',
+		  url:ctx+ '/xhs/newInfo',
+		  data: JSON.stringify(getAddData()),
+		  dataType: 'JSON',
+		  success: function(res){
+			  if(res.flag){
+				  infoId = res.infoId;
+				  saveImages();
+			  }
+		  }
+	});
+}
+function getAddData(){
+	var json ={
+		'infoTitle':$.trim($("#infoTitle").val()),
+		'type1':($("#likeType").val())[0],
+		'infoDetail':$.trim($('#infoDetail').val())
+	}
+	return json;
+}
+</script>
+</html>

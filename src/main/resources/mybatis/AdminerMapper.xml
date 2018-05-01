@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zj.adminer.application.mapper.AdminerMapper">
+	
+	<select id="list" resultType="java.util.Map">
+		SELECT
+			infoId,
+			infoTitle,
+			DATE_FORMAT(createTime,'%Y-%m-%d %H:%i') AS createTime
+		FROM 
+			z_j_info
+		WHERE 
+			isCheck = 0
+			<if test="selectInfo!=null">
+           		and infoTitle like CONCAT('%',#{selectInfo},'%' )
+       		</if>
+		order by createTime desc
+	</select>
+	
+	<select id="top0List" resultType="java.util.Map">
+		SELECT
+			infoId,
+			infoTitle,
+			DATE_FORMAT(createTime,'%Y-%m-%d %H:%i') AS createTime
+		FROM 
+			z_j_info
+		WHERE 
+			isCheck = 1 and top6 = 0
+			<if test="selectInfo!=null">
+           		and infoTitle like CONCAT('%',#{selectInfo},'%' )
+       		</if>
+	</select>
+	
+	<select id="top1List" resultType="java.util.Map">
+		SELECT
+			infoId,
+			infoTitle,
+			top6,
+			firstUrl,
+			DATE_FORMAT(createTime,'%Y-%m-%d %H:%i') AS createTime
+		FROM 
+			z_j_info
+		WHERE 
+			isCheck = 1 and top6 != 0
+		order by top6
+	</select>
+	
+	<select id="infoDetail" parameterType="string" resultType="java.util.Map">
+		SELECT 
+			infoTitle,
+			infoDetail,
+			DATE_FORMAT(createTime,'%Y-%m-%d %H:%i') as createTime,
+			group_concat(url) as url,
+			nickName,
+			headIcon
+		FROM 
+			z_j_info z1 left join z_j_images z2 on z1.infoId=z2.infoId
+			left join z_j_users z3 on z3.userId=z1.userId
+		WHERE 
+			z1.infoId = #{_parameter}
+	</select>
+	
+	<update id="infoIsCheck" parameterType="java.util.Map">
+		update
+			z_j_info
+		set 
+			isCheck = #{isCheck}
+		where 
+			infoId = #{infoId}
+	</update>
+	
+	<update id="outTop6" parameterType="java.util.Map">
+		update
+			z_j_info
+		set 
+			top6 = 0
+		where 
+			infoId = #{infoId}
+	</update>
+	
+	<update id="outTab" parameterType="java.util.Map">
+		update
+			z_j_liketype
+		set 
+			delFlag = 1
+		where 
+			id = #{id}
+	</update>
+	
+	<select id="selectTop" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT 
+			infoId
+		FROM
+			z_j_info
+		WHERE 
+			top6 = #{selectId}
+	</select>
+	
+	<update id="addTop6" parameterType="java.util.Map">
+		update
+			z_j_info
+		set 
+			top6 = #{selectId}
+		where 
+			infoId = #{infoid}
+	</update>
+	
+	<select id="buquanTop" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT
+			infoId,
+			infoTitle,
+			firstUrl
+		FROM 
+			z_j_info
+		WHERE 
+			isCheck = 1 and top6 = 0
+		order by top6
+		limit 0,#{page}
+	</select>
+	
+	<select id="checkTab" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			*
+		FROM 
+			z_j_liketype
+		WHERE 
+			type = #{tabName}
+			and delFlag = #{delFlag}
+	</select>
+	
+	<select id="tabList" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT
+			b.id as id,
+			count(a.type1) as tabCount,
+			b.type as typeName
+		FROM 
+			z_j_info a right join z_j_liketype b on a.type1 = b.id
+		WHERE 
+			delFlag = 0
+		<if test="selectTab!=null and selectTab!=''">
+          	and	b.type = #{selectTab}
+   		</if>
+		GROUP BY 
+			b.type
+		ORDER BY 
+			tabCount desc
+	</select>
+	
+	<update id="updateTab" parameterType="java.util.Map">
+		update
+			z_j_liketype
+		set 
+			delFlag = 0			
+		WHERE 
+			type = #{tabName}
+	</update>
+	
+	<update id="updateTabDD" parameterType="java.util.Map">
+		update
+			z_j_liketype
+		set 
+			type = #{tabName}		
+		WHERE 
+			id = #{db}
+	</update>
+	
+	<insert id="addTab" parameterType="java.util.Map">
+		insert into
+			z_j_liketype
+			(type)
+		values(
+			#{tabName}
+		)
+	</insert>
+</mapper>

@@ -1,0 +1,228 @@
+body {
+    background-color: #ffffff;
+    width: 100%;
+    overflow-x: hidden;
+}
+.specify{
+    width: 1200px;
+}
+.pageTop{
+    height: 120px;
+    background-color: #fff;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 90;
+    width: 100%;
+    border-bottom: 3px solid #f15467;
+}
+.pageTop .active{
+    color: #f15467 !important;
+    font-weight: bold !important;
+}
+.pageTop .logo{
+    float: left;
+    width: 121px;
+    height: 75px;
+    margin-top: 30px;
+    cursor: pointer;
+}
+.pageTop .menu-nav{
+    float: left;
+    border-top: 0;
+    margin-left: 50px;
+    height: 120px;
+    line-height: 120px;
+    text-align: center;
+    font-size: 10px;
+}
+.pageTop .menu-nav a{
+    font-size: 18px;
+    color: #818181;
+    font-weight: 100;
+    width: 125px;
+    display: inline-block;
+}
+.menu-download {
+  float: right;
+  height: 120px;
+  line-height: 120px;
+}
+.menu-download a.download-flag{
+  font-size: 18px;
+  font-weight: 100;
+  width: 125px;
+  display: inline-block;
+  color: #fff;
+}
+.pageTop .menu-nav a.download-flag {
+  color: #fff;
+}
+.download-flag .red-area {
+  background: #ff2741;
+  float: right;
+  top: 10px;
+  height: 30px;
+  width: 90px;
+  font-size: 14px;
+  position: relative;
+  line-height: 30px;
+  border-radius: 4px;
+  margin-left: 10px;
+  margin-right: 10px;
+  text-align: center;
+}
+.red-area .qrcode {
+  position: absolute;
+  box-sizing: border-box;
+  z-index: 100;
+  overflow: hidden;
+  padding: 0;
+  top: -1px;
+  left: 100px;
+  width: 0;
+  background: #fff;
+  max-height: 0;
+  transition: all 0.1s;
+  line-height: 15px;
+}
+.red-area .qrcode.active {
+  padding: 10px 10px 0 ;
+  width: 170px;
+  padding: 10px;
+  max-height: 300px;
+  border: 1px solid #333;
+  border-radius: 2px;
+}
+.qrcode .qr-img{
+  width: 100%;
+}
+a.download-flag:hover {
+  cursor: default;
+}
+.qrcode span {
+  font-size: 14px;
+  line-height: 16px;
+  color: #000;
+}
+.qrcode .qr-desc {
+  font-size: 16px;
+  line-height: 20px;
+}
+.qr-flag {
+  display: inline-block;
+  margin-left: 10px;
+}
+.qr-mini{
+  display: block;
+  float: right;
+  width: 30px;
+  height: 30px;
+  margin-top: 46px;
+}
+.modal-wrapper {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  display: none;
+}
+.mask {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  opacity: 0.4;
+}
+.modal{
+  position:absolute;
+  left: 50%;
+  top:50%;
+  background: #fff;
+  border-radius: 12px;
+  margin-left: -300px;
+  margin-top: -190px;
+  width: 600px;
+  height: 400px;
+  padding: 18px;
+}
+.xhs-logo {
+  width: 100px;
+}
+.modal .qr-code {
+  display: block;
+  position: absolute;
+  width: 250px;
+  top: 55px;
+  left: 50%;
+  margin-left: -125px;
+}
+.modal .bottom-area {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  bottom: 27px;
+  text-align: center;
+}
+.bottom-area .download-desc {
+  font-size: 20px;
+  color: #333;
+  font-weight: bold;
+}
+.bottom-area .download-desc .red {
+  color: #FF2741;
+}
+.bottom-area .slogan {
+  margin: 15px;
+  font-size: 14px;
+}
+
+.pageBottom{
+    background-color: #eeeeee;
+}
+.pageBottom .bottom-nav{
+    padding: 35px 0 30px;
+}
+.pageBottom .bottom-nav a{
+    color: #818181;
+    width: 125px;
+    display: inline-block;
+    font-weight: 100;
+}
+footer{
+    text-align: center;
+    color: #9f9f9f;
+    font-size: 15px;
+    padding-bottom: 20px;
+}
+footer div{
+    padding: 0 0 7px 0;
+}
+footer .beian{
+    color: #9f9f9f;
+}
+#backTop{
+    width: 36px;
+    height: 40px;
+    position: fixed;
+    display: none;
+    bottom: 55px;
+    right: 43px;
+    cursor: pointer;
+}
+.mTop5{
+    margin-top: 5px !important;
+}
+#leftREDer{
+    width: 110px;
+    height: 190px;
+    display: none;
+    position: fixed;
+    bottom: 50px;
+    cursor: pointer;
+    z-index: 101;
+}
+.container{
+    margin-top: 0px;
+}

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+<meta charset="utf-8">
+<title>个人信息</title>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="" />
+<meta name="author" content="zj" />
+
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap-select.min.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/theme.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.min.css}" />
+
+<script type="text/javascript" th:src="@{/js/jquery.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap-select.js}"></script>
+<script type="text/javascript" th:src="@{/js/defaults-zh_CN.js}"></script>
+</head>
+<body>
+
+	<div class="row-fluid">
+		<div class="widget widget-padding span12">
+			<div class="widget-header" style="position:relative;padding-left:77px;">
+				<i class="icon-list-alt"></i>
+				<h5>修改信息</h5>
+			</div>
+			<div class="widget-body" style="height:550px">
+				<div class="widget-forms clearfix">
+					<form class="form-horizontal">
+						<div class="control-group">
+							<label class="control-label">用户昵称</label>
+							<div class="controls">
+								<input class="span7" type="text" id="nickname" th:value="${personDetail.nickName}">
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">用户年龄</label>
+							<div class="controls">
+								<div class="input-append">
+									<input class="span7" type="text" id="age" th:value="${personDetail.age}"><span class="add-on">岁</span>
+								</div>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">喜好设置</label>
+							<div class="controls">
+								<div class="input-append">
+									<select class="selectpicker" multiple data-live-search="true" data-max-options="3" id="likeType" th:utext="${selectLike}">
+									                                
+									</select>
+								</div>
+							</div>
+						</div>
+						
+					</form>
+				</div>
+			</div>
+			<div class="widget-footer">
+				<button class="btn btn-primary" type="submit" onclick="save()">保存</button>
+				<button class="btn" type="button" onclick="goback()">取消</button>
+			</div>
+		</div>
+	</div>
+
+<input type="hidden" id="ctx" th:value="${#httpServletRequest.getContextPath()}" />
+<input type="hidden" id="userId" th:value="${personDetail.userId}"/>
+</body>
+
+<script type="text/javascript">
+$(function () {
+	$.ajax({
+		  type: 'GET',
+		  contentType: 'application/json; charset=utf-8',
+		  url:ctx+ '/person/LikeType',
+		  dataType: 'JSON',
+		  success: function(res){
+			  $('.selectpicker').selectpicker('val', res.likeType).trigger("change");
+		  }
+	});
+})
+var regAge=/^[0-9]{1,2}$/;	
+var ctx = $('#ctx').val();
+var userId = $('#userId').val(); 
+
+function goback(){	
+	window.location.href = ctx+'/person/Info/'+userId;
+}
+
+function save(){
+	if("" == $.trim($("#nickname").val())){
+		alert("请输入昵称!")
+		return false;
+	}
+	
+	if(!regAge.test($.trim($("#age").val()))){
+		alert("年龄输入有误!")
+		return false;
+	}
+	
+	$.ajax({
+		  type: 'POST',
+		  contentType: 'application/json; charset=utf-8',
+		  url:ctx+ '/person/updatePerInfo',
+		  data: JSON.stringify(getAddData()),
+		  dataType: 'JSON',
+		  success: function(res){
+			  if(res.flag){
+				  goback();
+			  }
+		  }
+	});
+}
+function getAddData(){
+	var json ={
+		'nickname':$.trim($('#nickname').val()),
+		'age':$.trim($('#age').val()),
+		'likeType':$('#likeType').val()
+	}
+	return json;
+}
+</script>
+</html>

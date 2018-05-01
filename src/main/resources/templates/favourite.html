@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+<meta charset="utf-8">
+<title>我的收藏</title>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="" />
+<meta name="author" content="zj" />
+
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/theme.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.min.css}" />
+<style type="text/css">
+   .lilist {
+    	list-style-type: none;
+	}
+    
+</style>
+</head>
+<body>
+<div class="row-fluid">
+	<div class="widget widget-padding span12">
+		<div class="widget-header" style="position:relative;padding-left:77px">
+			<i class="icon-list-alt"></i>
+			<h5>我的收藏</h5>
+			<div style="position:absolute;right:15px;top:0;">
+				<img style="border-radius: 50%;width: 48px;height: 48px" th:src="@{'../../../../../images'+${headIcon}}"/>
+				<a href="#" th:text="${nickName}"></a>
+			</div>
+		</div>
+		<div class="widget-body">
+			<div class="widget-forms clearfix">
+				<form class="form-horizontal">
+					<div class="control-group">
+						<div class="controls">
+							<input type="text" id="selectIfon" placeholder="标题" style="margin: 0px 0px 0px 3%;    width: 40%;"/>
+							<button class="btn btn-primary" type="button" onclick="selectInfo()">查询</button>
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls">
+							<ul id="infoList">
+								<li th:each="item,itemStat : ${infosList}" class="lilist">
+									<div class="comment-bubble" style="margin:5px 10px 5px 10px;width: 80%;">
+										<h4>
+											<a th:onclick="'javascript:goInfo('+${item.infoId}+')'"><strong th:text="${item.infoTitle}"></strong></a>
+											<button class="btn btn-primary" type="button" th:onclick="'javascript:favouriteDel('+${item.id}+',this)'" style="float: right;">删除</button>
+										</h4>
+									</div>
+								</li>
+							</ul> 
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<input type="hidden" id="ctx" th:value="${#httpServletRequest.getContextPath()}" />
+</body>
+<script type="text/javascript" th:src="@{/js/jquery.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery-ui.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap2.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery.knob.js}"></script>
+<script type="text/javascript" th:src="@{/js/realm.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery.slimscroll.min.js}"></script>
+<script type="text/javascript">
+var ctx = $('#ctx').val();
+
+function favouriteDel(id,e){
+	if(confirm("删除后无法恢复")){
+		$.ajax({
+	        type: 'POST',  
+	        contentType: 'application/json; charset=utf-8',
+	        url: ctx+'/person/favouriteDel',  
+	        data:JSON.stringify({id:id}),
+	        dataType: 'json',
+	        success: function (msg) { 
+	        	if(msg.flag){
+	        		$(e).parent().parent().remove();
+	        	}else{
+	        		alert('刷新后重试！');
+	        	}
+	        },  
+	    });
+	}
+}
+
+function goInfo(id){
+	window.location.href = ctx+'/xhs/Info/'+id;
+}
+
+function selectInfo(){
+	$.ajax({
+        type: 'POST',  
+        contentType: 'application/json; charset=utf-8',
+        url: ctx+'/person/infoSelect',  
+        data: JSON.stringify({
+        	selectInfo:$.trim($("#selectIfon").val())
+        }),
+        dataType: 'json',
+        success: function (msg) { 
+        	var list = msg.list;
+        	var temp = '';
+	            $.each(list,function(k,v){
+	            	temp +='<li class="lilist">'
+						+'<div class="comment-bubble" style="margin:5px 10px 5px 10px">'
+						+'<h4><a onclick="goInfo("'+v.infoId+'")">'
+						+'<strong>'
+						+v.infoTitle
+						+'</strong></a></h4>'
+						+'<button class="btn btn-primary" type="button"'
+						+' onclick="favouriteDel('+v.infoId+',this)">删除</button></div></li>';
+	            });
+	            $('#infoList').html(temp);
+        },  
+    });
+}
+</script>
+</html>

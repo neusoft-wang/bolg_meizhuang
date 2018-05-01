@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+<meta charset="utf-8">
+<title>注册</title>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="" />
+<meta name="author" content="zj" />
+
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/bootstrap.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/theme.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/assets/css/font-awesome.min.css}" />
+
+<script type="text/javascript" th:src="@{/js/jquery.js}"></script>
+</head>
+<body>
+
+	<div class="row-fluid">
+		<div class="widget widget-padding span12">
+			<div class="widget-header" style="position:relative;padding-left:77px;">
+				<i class="icon-list-alt"></i>
+				<h5>注册</h5>
+			</div>
+			<div class="widget-body">
+				<div class="widget-forms clearfix">
+					<form class="form-horizontal">
+						<div class="control-group">
+							<label class="control-label">注册帐号</label>
+							<div class="controls">
+								<input class="span7" type="text" id="username"> <span id=""></span>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">用户密码</label>
+							<div class="controls">
+								<input class="span7" type="password" id="password1"> <span id=""></span>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">确认密码</label>
+							<div class="controls">
+								<input class="span7" type="password" id="password2"> <span id=""></span>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">用户昵称</label>
+							<div class="controls">
+								<input class="span7" type="text" id="nickname">
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">常用邮箱</label>
+							<div class="controls">
+								<input class="span7" type="text" id="mail"> <span class="help-inline"></span>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label">用户年龄</label>
+							<div class="controls">
+								<div class="input-append">
+									<input class="span7" type="text" id="age"><span class="add-on">岁</span>
+								</div>
+								<div class="input-append">
+									<h6>*注册成功后，到个人信息可添加个人喜好*</h6>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div class="widget-footer">
+				<button class="btn btn-primary" type="submit" onclick="save()">保存</button>
+				<button class="btn" type="button" onclick="goback()">取消</button>
+			</div>
+		</div>
+	</div>
+
+<input type="hidden" id="ctx" th:value="${#httpServletRequest.getContextPath()}" />
+</body>
+
+<script type="text/javascript">
+    var ctx = $('#ctx').val();
+	var regAge=/^[0-9]{1,2}$/;
+	var regMail=/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
+	
+	function goback(){
+		window.location.href=ctx+"/login/page";
+	}
+	
+	function save(){
+		
+		if("" == $.trim($("#username").val())){
+			alert("请输入用户名!")
+			return false;
+		}
+		
+		if("" == $.trim($("#password1").val())){
+			alert("请输入密码")
+			return false;
+		}
+		
+		if("" == $.trim($("#password2").val())){
+			alert("请输入确认密码!")
+			return false;
+		}
+		
+		if($.trim($("#password1").val()) != $.trim($("#password2").val())){
+			alert("输入的密码不一致!")
+			return false;
+		}
+		
+		if("" == $.trim($("#nickname").val())){
+			alert("请输入昵称!")
+			return false;
+		}
+		
+		if(!regMail.test($.trim($("#mail").val()))){
+			alert("邮箱输入有误!")
+			return false;
+		}
+		
+		if(!regAge.test($.trim($("#age").val()))){
+			alert("年龄输入有误!")
+			return false;
+		}
+		
+		$.ajax({
+			  type: 'POST',
+			  contentType: 'application/json; charset=utf-8',
+			  url:ctx+ '/login/regist',
+			  data: JSON.stringify(getAddData()),
+			  dataType: 'JSON',
+			  success: function(res){
+				  if(res.flag){
+				 	 window.location.href=ctx+'/login/headIcon';
+				  }else{
+					 alert(res.msg);
+				  }
+			  }
+		});
+	}
+	function getAddData(){
+		var json ={
+			'username':$.trim($("#username").val()),
+			'password':$.trim($('#password1').val()),
+			'nickname':$.trim($('#nickname').val()),
+			'mail':$.trim($('#mail').val()),
+			'age':$.trim($('#age').val())
+		}
+		return json;
+	}
+</script>
+
+</html>

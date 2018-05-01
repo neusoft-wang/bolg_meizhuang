@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zj.xhs.application.mapper.XhsMapper">
+
+	<resultMap id="BaseResultMap" type="com.zj.xhs.domain.Info">
+		<id column="infoId" property="infoId" jdbcType="INTEGER" />
+		<result column="infoTitle" property="infoTitle" jdbcType="VARCHAR" />
+		<result column="infoDetail" property="infoDetail" jdbcType="VARCHAR" />
+		<result column="url" property="url" jdbcType="VARCHAR" />
+		<result column="createTime" property="createTime" jdbcType="DATE" />
+		<result column="type1" property="type1" jdbcType="INTEGER" />
+		<result column="comment" property="comment" jdbcType="INTEGER" />
+		<result column="great" property="great" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<select id="selectInfo" parameterType="java.util.Map" resultMap="BaseResultMap">
+		SELECT
+			userId,
+			infoId,
+			infoTitle,
+			infoDetail,
+			createTime,
+			type1,
+			comment,
+			great,
+			firstUrl as url
+		FROM
+			z_j_info
+		WHERE 
+			isCheck = 1
+			<if test="likeType!= null">
+				and type1 in
+				<foreach collection="likeType" index="index" item="item" open="(" separator="," close=")">
+		                #{item}       
+		        </foreach>
+		    </if>
+			<if test="serchInfo != '' and serchInfo!= null">
+				and infoTitle like CONCAT('%',#{serchInfo},'%' )
+			</if>
+<!-- 		order by createTime desc -->
+		order by great desc
+		limit #{p},8
+	</select>
+	
+	<select id="selectCountInfo" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT
+			count(infoId)
+		FROM 
+			z_j_info
+		WHERE 
+			isCheck = 1
+			and type1 = #{type1}
+	</select>
+	
+	<insert id="newInfo" parameterType="java.util.Map" useGeneratedKeys="true">
+		<selectKey resultType="java.lang.Integer" keyProperty="infoId" order="AFTER">
+			SELECT
+			LAST_INSERT_ID() as infoId
+		</selectKey>
+		INSERT INTO 
+			z_j_info
+			(infoTitle,infoDetail,createTime,type1,userId)
+		VALUES
+			(#{infoTitle},#{infoDetail},now(),#{type1},#{userId})
+	</insert>
+		
+	<insert id="insertImage" parameterType="java.util.List">
+		INSERT INTO 
+			z_j_images
+			(infoId,url)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+           (#{item.infoId,jdbcType=INTEGER},#{item.fileName,jdbcType=VARCHAR})
+       	</foreach>
+	</insert>	
+	
+	<update id="updateFImages" parameterType="java.util.Map">
+		update
+			z_j_info
+		set 
+			firstUrl = #{fileName}
+		where 
+			infoId = #{infoId}
+	</update>
+	
+	<select id="infoDetail" parameterType="string" resultType="java.util.Map">
+		SELECT 
+			infoTitle,
+			infoDetail,
+			DATE_FORMAT(createTime,'%Y-%m-%d %H:%i') as createTime,
+			comment,
+			great,
+			group_concat(url) as url,
+			z1.userId as userId,
+			nickName,
+			headIcon
+		FROM 
+			z_j_info z1 left join z_j_images z2 on z1.infoId=z2.infoId
+			left join z_j_users z3 on z3.userId=z1.userId
+		WHERE 
+			z1.infoId = #{_parameter}
+	</select>
+	
+	<select id="infoComment" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT 
+			id,
+			comment,
+			DATE_FORMAT(creatTime,'%Y-%m-%d %H:%i') as creatTime,
+			nickName,
+			headIcon,
+			z1.userId as userId
+		FROM 
+			z_j_comment z1 left join z_j_users z2 on z1.userId=z2.userId
+		WHERE 
+			z1.infoId = #{infoId}
+		order by creatTime desc
+	</select>
+	
+	<insert id="buildComment" parameterType="java.util.Map">
+		INSERT INTO 
+			z_j_comment
+			(infoId,userId,comment,creatTime)
+		VALUES
+			(#{infoId},#{userId},#{comment},now())
+	</insert>
+	
+	<select id="boolGreat" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT
+			count(id)
+		FROM 
+			z_j_great
+		WHERE 
+			infoId = #{infoId}
+			and userId = #{userId}
+	</select>
+	
+	<select id="boolFavourite" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT
+			count(id)
+		FROM 
+			z_j_favorite
+		WHERE 
+			infoId = #{infoId}
+			and userId = #{userId}
+	</select>
+	
+	<insert id="insertGreat" parameterType="java.util.Map">
+		INSERT INTO 
+			z_j_great
+			(infoId,userId)
+		VALUES
+           (#{infoId},#{userId})
+	</insert>
+	
+	<insert id="insertFavourite" parameterType="java.util.Map">
+		INSERT INTO 
+			z_j_favorite
+			(infoId,userId)
+		VALUES
+           (#{infoId},#{userId})
+	</insert>
+	
+	
+</mapper>
